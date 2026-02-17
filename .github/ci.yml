@@ -3,35 +3,32 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - '**'
   pull_request:
     branches:
-      - main
+      - '**'
     types: [opened, synchronize, reopened]
+  workflow_dispatch:
 
 jobs:
-  preview:
+  CI:
     runs-on: ubuntu-latest
-    environment: dev
     permissions:
-      contents: read
-      pull-requests: write
+      contents: write
+      pages: write
+      id-token: write
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4 
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: ${{ inputs.bun-version }}
 
       - name: Setup root .env
         run: |
           if [ -f .env.sample ]; then
-            if [ ! -f .env ]; then
-              cp .env.sample .env || true
-            fi
+            cp .env.sample .env
           fi
         shell: bash
 
@@ -39,22 +36,12 @@ jobs:
         id: latest_commit_message
         run: |
           TITLE=""
-          if [ "${{ github.event_name }}" = "pull_request" ] && [ -n "${{ github.event.pull_request.title }}" ]; then
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
             TITLE="${{ github.event.pull_request.title }}"
-          elif [ -n "${{ github.event.head_commit.message }}" ]; then
-            TITLE="${{ github.event.head_commit.message }}"
           else
-            if git rev-parse --git-dir > /dev/null 2>&1; then
-              TITLE=$(git log -1 --pretty=format:%s 2>/dev/null || true)
-            fi
+            TITLE=$(git log -1 --pretty=format:%s || echo "No commit message found")
           fi
-
-          # Escape characters for GitHub output
-          TITLE_SAFE=${TITLE//'%'/'%25'}
-          TITLE_SAFE=${TITLE_SAFE//$'\n'/'%0A'}
-          TITLE_SAFE=${TITLE_SAFE//$'\r'/'%0D'}
-
-          echo "title=$TITLE_SAFE" >> "$GITHUB_OUTPUT"
+          echo "title=$TITLE" >> "$GITHUB_OUTPUT"
         shell: bash
 
       - name: Cache Bun dependencies
@@ -66,9 +53,7 @@ jobs:
             ${{ runner.os }}-bun-
 
       - name: Install dependencies
-        shell: bash
         run: bun install --frozen-lockfile
 
       - name: Build, Lint & Typecheck
-        shell: bash
-        run: bun run --parallel ${{ inputs.build-script }} lint typecheck
+        run: bun run --parallel build lint typecheck
