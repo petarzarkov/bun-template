@@ -28,6 +28,7 @@
     "prepare": "husky || true",
     "dev": "bun --watch src/index.ts",
     "start": "bun --max-old-space-size=1536 dist/index.js",
+    "prebuild": "rm -rf dist",
     "build": "tsc -p tsconfig.build.json",
     "test": "bun test --bail",
     "test:watch": "bun test --watch",
