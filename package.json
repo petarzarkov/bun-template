@@ -1,7 +1,7 @@
 {
-  "name": "npm-package-template",
+  "name": "bun-basic-template",
   "version": "0.0.1",
-  "description": "NPM package template",
+  "description": "Bun basic template",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/types/index.d.ts",
@@ -31,6 +31,7 @@
     "build": "tsc -p tsconfig.build.json",
     "test": "bun test --bail",
     "test:watch": "bun test --watch",
+    "test:cov": "bun test --coverage",
     "lint": "biome check --write --unsafe .",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit --skipLibCheck --skipDefaultLibCheck",
