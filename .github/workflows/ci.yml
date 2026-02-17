@@ -57,3 +57,6 @@ jobs:
 
       - name: Build, Lint & Typecheck
         run: bun run --parallel build lint typecheck
+
+      - name: Test Coverage
+        run: bun run test:cov
